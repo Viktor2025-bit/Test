@@ -1,20 +1,37 @@
 const mongoose = require("mongoose")
 
-const TestSchema = new mongoose.Schema({
-    candidate : {
+const testSchema = new mongoose.Schema({
+    userId : {
         type : mongoose.Schema.Types.ObjectId,
-        ref : "User",
-        required : true
+        ref: "User",
+        required: true
     },
 
-    subject : {
+    testFile : {
         type : String,
-        required : true
+        required: true
     },
 
-    questions : {
-        type : Array,
-        required : true
+    questions: [
+        {
+            question : String,
+            options: [String],
+            correctAnswer : String,
+            userAnswer : {
+                type : String,
+                default: ""
+            }
+        }
+    ],
+
+    isSubmitted : {
+        type : Boolean,
+        default: false
+    },
+
+    isAutoSubmitted : {
+        type : Boolean,
+        default : false
     },
 
     score : {
@@ -22,20 +39,21 @@ const TestSchema = new mongoose.Schema({
         default : 0
     },
 
-    status : {
-        type : String,
-        enum : [ "pending", "completed"],
-        default : "pending"
+    submissionTime : {
+        type : Date
     },
 
-    startedAt : {
+    startTime: {
+        type: Date,
+        default: Date.now,
+      },
+
+    createdAt : {
         type : Date,
         default : Date.now
-    },
-
-    submittedAt : {
-        type : Date
     }
 })
 
-module.exports = mongoose.model("Test", TestSchema)
+const Test = mongoose.model("Test", testSchema)
+
+module.exports = Test

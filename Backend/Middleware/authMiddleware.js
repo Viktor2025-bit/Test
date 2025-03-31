@@ -1,24 +1,17 @@
 const jwt = require("jsonwebtoken")
 
-exports.authMiddleware = (req, res, next) => {
-  const token = req.header("Authorization")
-  if(!token){
-    return res.status(401).json({ Msg : "Access denied. No token provided" })
-  }
+const authMiddleware = (req, res, next) => {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "No token provided" });
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      if (decoded.userId !== req.query.userId) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+      next();
+    } catch (error) {
+      res.status(401).json({ message: "Invalid token" });
+    }
+  };
 
-  try {
-    const decoded = jwt.verify(token.replace("Bearer", ""),
-process.env.JWT_SECRET)
-req.user = decoded
-next()
-  } catch (error) {
-    res.status(400).json({ Msg : "Invalid token" })
-  }
-}
-
-exports.adminMiddleware = (req, res, next) => {
-  if(req.user.role !== "admin"){
-    return res.status(403).json({ Msg : "Access denied. Admins only"})
-  }
-  next()
-}
+  module.exports = authMiddleware

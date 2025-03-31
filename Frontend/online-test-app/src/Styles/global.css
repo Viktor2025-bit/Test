@@ -1,0 +1,125 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap");
+
+:root {
+  --primary-color: #ff6b6b; /* Vibrant Red */
+  --secondary-color: #1db954; /* Vibrant Green */
+  --background-color: #121212; /* Dark Mode */
+  --text-color: #ffffff;
+  --button-hover: #ff4757;
+  --shadow-color: rgba(255, 107, 107, 0.4);
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: "Poppins", sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  background: url("your-image-url.jpg") no-repeat center center/cover; /* Add a valid image URL or remove */
+}
+
+.home-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* Ensure full height */
+  width: 100vw;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Hero Section */
+.hero-section {
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 50px;
+}
+
+.hero-section h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.hero-section p {
+  font-size: 1.2rem;
+  opacity: 0.8;
+  margin-bottom: 20px;
+}
+
+/* CTA Button */
+.cta-button {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  font-size: 1rem;
+  font-weight: bold;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 4px 10px var(--shadow-color);
+  cursor: pointer;
+}
+
+.cta-button:hover {
+  background-color: var(--button-hover);
+  transform: scale(1.05);
+}
+
+/* Features Section */
+.features-section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.feature {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  width: clamp(250px, 30%, 400px); /* Responsive width */
+  min-width: 250px;
+  transition: transform 0.3s ease-in-out;
+}
+
+.feature h3 {
+  font-size: 1.5rem;
+}
+
+.feature p {
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.feature:hover {
+  transform: translateY(-5px);
+}
+
+.feature-card, .testimonial-card {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.feature-card h3, .testimonial-card p {
+  font-size: 1.2rem;
+}
+
+.testimonial-card strong {
+  display: block;
+  margin-top: 10px;
+  font-size: 1rem;
+  color: #ff4b5c;
+}

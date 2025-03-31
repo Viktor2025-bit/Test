@@ -1,35 +1,29 @@
-require("dotenv").config();
+const dotenv = require("dotenv")
+dotenv.config()
 
-const express = require("express");
-const cors = require("cors");
-const mongoose = require("./Config/db");
-const testRoutes = require("./Routes/testRoutes");
-const authRoutes = require("./Routes/authRoutes");
+const express = require("express")
+const app = express()
+const cors = require("cors")
+const mongoose = require("mongoose")
+const userRoutes = require("./Routes/User.route")
+const testRoutes = require("./Routes/Test.route")
 
-const app = express();
+app.use(express.json())
+app.use(cors())
 
-// ✅ Proper CORS setup for Codespaces
-const corsOptions = {
-    origin: [
-        "https://animated-space-system-wr547gr7gx4vh97ww-5173.app.github.dev", // Your frontend URL (update port if needed)
-        "https://animated-space-system-wr547gr7gx4vh97ww-7000.app.github.dev"  // Your backend URL
-    ],
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    credentials: true, // Allow cookies (if needed)
-    allowedHeaders: ["Content-Type", "Authorization"]
-};
+app.use("/api/user", userRoutes)
+app.use("/api/test", testRoutes)
 
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // Handle preflight requests
+const port = process.env.PORT || 5000
 
-app.use(express.json());
+mongoose.connect(process.env.MONGO_URI)
+.then(() => {
+    console.log("Connected")
+})
+.catch((err) => {
+    console.log(err.message)
+})
 
-// ✅ API Routes
-app.use("/api/test", testRoutes);
-app.use("/api/user", authRoutes);
-
-// ✅ Server Port
-const port = process.env.PORT || 7000;
 app.listen(port, () => {
-    console.log(`Server is running on https://animated-space-system-wr547gr7gx4vh97ww-${port}.app.github.dev/`);
-});
+    console.log(`server is running at http://localhost:${port}`)
+})
