@@ -1,19 +1,30 @@
-const express = require("express")
-const { getQuestions} = require("../Controllers/test.controller")
-const { submitTest } = require("../Controllers/submit.controller") 
-const { autoSubmitTest } = require("../Controllers/autoSubmit.controller")
-const { saveAnswer } = require("../Controllers/saveAnswer.controller")
-const authMiddleware = require("../Middleware/authMiddleware")
+const express = require('express');
+const Test = require("../Models/Test")
+const { createNewTest, getAllTest, getTest, updateTest, deleteTest } = require("../Controllers/test.controller")
+const { protect, teacher } = require("../Middleware/authMiddleware")
 
-const router = express.Router()
+const router = express.Router();
 
-router.get("/questions", authMiddleware, getQuestions)
+// @route   POST /api/tests
+// @desc    Create a new test
+router.post('/', protect, teacher, createNewTest );
 
-router.post("/submit", submitTest)
+// @route   GET /api/tests
+// @desc    Get all tests
+router.get('/', protect, getAllTest );
 
-router.post("/save-answer", saveAnswer)
+// @route   GET /api/tests/:id
+// @desc    Get test by ID
+router.get('/:id', protect, getTest );
 
-router.post("/auto-submit", autoSubmitTest)
+// @route   PUT /api/tests/:id
+// @desc    Update test
+router.put('/:id', protect, teacher, updateTest );
+
+// @route DELETE /api/tests/:Id
+// @desc   Delete test
+
+router.delete('/:id', protect, teacher, deleteTest )
 
 
-module.exports = router
+module.exports = router;

@@ -1,59 +1,47 @@
-const mongoose = require("mongoose")
+const mongoose = require('mongoose');
+
+const questionSchema = new mongoose.Schema({
+  questionId: String,  // For OpenTDB questions
+  question: String,
+  correctAnswer: String,
+  incorrectAnswers: [String],
+  type: {
+    type: String,
+    enum: ['multiple', 'boolean'],
+    default: 'multiple'
+  },
+  difficulty: {
+    type: String,
+    enum: ['easy', 'medium', 'hard'],
+    default: 'medium'
+  },
+  category: String
+});
 
 const testSchema = new mongoose.Schema({
-    userId : {
-        type : mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true
-    },
+  title: {
+    type: String,
+    required: true
+  },
+  description: String,
+  creator: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  timeLimit: {
+    type: Number,  // In minutes
+    default: 30
+  },
+  questions: [questionSchema],
+  isPublished: {
+    type: Boolean,
+    default: false
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
 
-    testFile : {
-        type : String,
-        required: true
-    },
-
-    questions: [
-        {
-            question : String,
-            options: [String],
-            correctAnswer : String,
-            userAnswer : {
-                type : String,
-                default: ""
-            }
-        }
-    ],
-
-    isSubmitted : {
-        type : Boolean,
-        default: false
-    },
-
-    isAutoSubmitted : {
-        type : Boolean,
-        default : false
-    },
-
-    score : {
-        type : Number,
-        default : 0
-    },
-
-    submissionTime : {
-        type : Date
-    },
-
-    startTime: {
-        type: Date,
-        default: Date.now,
-      },
-
-    createdAt : {
-        type : Date,
-        default : Date.now
-    }
-})
-
-const Test = mongoose.model("Test", testSchema)
-
-module.exports = Test
+module.exports = mongoose.model('Test', testSchema);

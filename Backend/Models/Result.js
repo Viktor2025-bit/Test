@@ -1,34 +1,39 @@
-const mongoose = require("mongoose")
+const mongoose = require('mongoose');
+
+const answerSchema = new mongoose.Schema({
+  questionId: String,
+  userAnswer: String,
+  isCorrect: Boolean
+});
 
 const resultSchema = new mongoose.Schema({
-    candidate : {
-        type : mongoose.Schema.ObjectId,
-        ref : "User",
-        required : true
-    },
+  test: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Test',
+    required: true
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  answers: [answerSchema],
+  score: {
+    type: Number,
+    required: true
+  },
+  totalQuestions: {
+    type: Number,
+    required: true
+  },
+  timeTaken: {
+    type: Number,  // In seconds
+    required: true
+  },
+  completedAt: {
+    type: Date,
+    default: Date.now
+  }
+});
 
-    score : {
-        type : Number,
-        required : true
-    },
-
-    totalQuestions : {
-        type : Number,
-        required : true
-    },
-
-    correctAnswers : {
-        type : Number,
-        required : true
-    },
-
-    submittedAt : {
-        type : Date,
-        default : Date.now
-    }
-})
-
-
-const testResult = mongoose.model("TestResult", resultSchema)
-
-module.exports = testResult
+module.exports = mongoose.model('Result', resultSchema);

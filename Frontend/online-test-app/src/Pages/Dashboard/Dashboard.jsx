@@ -22,9 +22,9 @@ const Dashboard = () => {
       try {
         setLoading(true);
         const [userRes, activeRes, resultsRes] = await Promise.all([
-          fetch(`https://special-space-umbrella-q74xqp7qpx4jhrpv-7000.app.github.dev/api/user/stats?userId=${userId}`, { headers: { Authorization: `Bearer ${token}` } }),
-          fetch(`https://special-space-umbrella-q74xqp7qpx4jhrpv-7000.app.github.dev/api/user/tests/active?userId=${userId}`, { headers: { Authorization: `Bearer ${token}` } }),
-          fetch(`https://special-space-umbrella-q74xqp7qpx4jhrpv-7000.app.github.dev/api/user/results?userId=${userId}`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`http://localhost:7000/api/user/stats?userId=${userId}`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`http://localhost:7000/api/user/tests/active?userId=${userId}`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`http://localhost:7000/api/user/results?userId=${userId}`, { headers: { Authorization: `Bearer ${token}` } }),
         ]);
 
         const user = await userRes.json();
@@ -45,59 +45,35 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
+
     if (userId && token) fetchData();
     else navigate("/login");
   }, [userId, token]);
 
-  useEffect(() => {
-    if (timeLeft === null || timeLeft <= 0) return;
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => (prev <= 1 ? 0 : prev - 1));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [timeLeft]);
-
-  const autoSubmitTest = async () => {
-    if (!activeTest) return;
-    try {
-      await fetch("https://special-space-umbrella-q74xqp7qpx4jhrpv-7000.app.github.dev/api/test/auto-submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ testId: activeTest.testId, userId }),
-      });
-      setActiveTest(null);
-      setTimeLeft(null);
-      toast.success("Test auto-submitted");
-      window.location.reload();
-    } catch (error) {
-      toast.error("Failed to auto-submit test");
-    }
-  };
-
   const handleStartTest = async () => {
+    if (activeTest) {
+      toast.info("You already have an active test!");
+      navigate(`/test?testId=${activeTest.testId}`);
+      return;
+    }
+
     try {
       const response = await fetch(
         `https://special-space-umbrella-q74xqp7qpx4jhrpv-7000.app.github.dev/api/test/questions?userId=${userId}&amount=${amount}&difficulty=${difficulty}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { method: "POST", headers: { Authorization: `Bearer ${token}` } }
       );
+
+      if (!response.ok) throw new Error("Failed to start test");
+
       const data = await response.json();
+      if (!data.testId) throw new Error("Invalid test data received");
+
       toast.success("New test started");
-      navigate(`/test?testId=${data._id}`);
+      navigate(`/test?testId=${data.testId}`);
     } catch (error) {
-      toast.error("Failed to start test");
+      console.error("Error starting test:", error);
+      toast.error(error.message || "Failed to start test");
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.clear();
-    toast.info("Logged out");
-    window.location.href = "/login";
-  };
-
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? "0" + secs : secs}`;
   };
 
   if (loading) return <div className="dashboard">Loading...</div>;
@@ -106,13 +82,10 @@ const Dashboard = () => {
     <div className="dashboard">
       <header>
         <h1>Welcome, {userData.username}!</h1>
-        <button onClick={handleLogout}>Logout</button>
+        <button onClick={() => { localStorage.clear(); window.location.href = "/login"; }}>Logout</button>
         <ToastContainer position="top-right" autoClose={3000} hideProgressBar/>
       </header>
-      <section className="stats">
-        <p>Last Score: {userData.lastScore}</p>
-        <p>Tests Completed: {userData.testsCompleted}</p>
-      </section>
+      
       <section className="new-test">
         <h2>Start a New Test</h2>
         <div className="filters">
@@ -127,37 +100,15 @@ const Dashboard = () => {
           </select>
         </div>
         <button onClick={handleStartTest} disabled={loading}>Start New Test</button>
-        <ToastContainer position="top-right" autoClose={3000} hideProgressBar/>
       </section>
+
       {activeTest && (
         <section className="active-test">
           <h2>Active Test</h2>
           <p>Test ID: {activeTest.testId}</p>
-          <p>Progress: {activeTest.answered}/{activeTest.totalQuestions}</p>
-          <p>Time Left: {formatTime(timeLeft)}</p>
-          <button onClick={() => (window.location.href = `/test?testId=${activeTest.testId}`)}>
-          <ToastContainer position="top-right" autoClose={3000} hideProgressBar/>
-            Continue Test
-          </button>
+          <button onClick={() => navigate(`/test?testId=${activeTest.testId}`)}>Continue Test</button>
         </section>
       )}
-      <section className="past-results">
-        <h2>Past Results</h2>
-        <table>
-          <thead>
-            <tr><th>Date</th><th>Score</th><th>Details</th></tr>
-          </thead>
-          <tbody>
-            {results.map((result) => (
-              <tr key={result._id}>
-                <td>{new Date(result.submittedAt).toLocaleDateString()}</td>
-                <td>{result.percentage}% ({result.score}/{result.totalQuestions})</td>
-                <td><a href={`/result?id=${result._id}`}>View</a></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
     </div>
   );
 };

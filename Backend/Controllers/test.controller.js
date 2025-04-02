@@ -1,20 +1,125 @@
-const axios = require("axios")
+const express = require("express")
+const testModel = require("../Models/Test")
 
-exports.getQuestions = async (req, res) => {
-  try {
-    const { amount = 20, difficulty = "hard", type = "multiple" } = req.query
 
-    const apiUrl = `https://opentdb.com/api.php?amount=${amount}&difficulty=${difficulty}&type=${type}`
+// Create a new test
+const createNewTest = async (req, res) => {
 
-    const response = await axios.get(apiUrl)
-    if(response.data.response_code!==0){
-        return res.status(400).json({ Msg : "Failed to fetch questions" })
+    try {
+        const { title, description, timeLimit, questions } = req.body
+
+        const test = new testModel.create({ title, description, timeLimit, creator: req.user._id })
+
+        res.status(201).json(test)
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ Msg: "Internal server error" })
+    }
+}
+
+
+// Get all test
+
+const getAllTest = async (req, res) => {
+    try {
+        let query = {}
+
+        // if student only show published test
+
+        if (req.user.role === "student") {
+            query = { isPublished: true }
+        } else if (req.user.role === "teacher") {
+            query = { creator: req.user._id }
+        }
+        const tests = await Test.find(query).populate('creator', 'username');
+        res.json(tests);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+}
+
+
+const getTest = async (req, res) => {
+
+    try {
+        const test = await Test.findById(req.params.id);
+
+        if (!test) {
+            return res.status(404).json({ message: 'Test not found' });
+        }
+
+        // Check if user is creator
+        if (test.creator.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+            return res.status(401).json({ message: 'Not authorized' });
+        }
+
+        const updatedTest = await Test.findByIdAndUpdate(
+            req.params.id,
+            { $set: req.body },
+            { new: true }
+        );
+
+        res.json(updatedTest);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 
-    res.status(200).json({ Msg : "Questions fetched successfully", testId: test._id,
-      questions: questions.map((q) => ({ text: q.text, options: q.options })), questions : response.data.results, starTime : new Date()})
-  } catch (error) {
-    res.status(500).json({ Msg : error.message })
-  }
 }
+
+
+const updateTest = async (req, res) => {
+    try {
+        const test = await Test.findById(req.params.id);
+
+        if (!test) {
+            return res.status(404).json({ message: 'Test not found' });
+        }
+
+        // Check if user is creator
+        if (test.creator.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+            return res.status(401).json({ message: 'Not authorized' });
+        }
+
+        const updatedTest = await Test.findByIdAndUpdate(
+            req.params.id,
+            { $set: req.body },
+            { new: true }
+        );
+
+        res.json(updatedTest);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+}
+
+
+const deleteTest = async (req, res) => {
+
+    try {
+        const test = await Test.findById(req.params.id);
+
+        if (!test) {
+            return res.status(404).json({ message: 'Test not found' });
+        }
+
+        // Check if user is creator
+        if (test.creator.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+            return res.status(401).json({ message: 'Not authorized' });
+        }
+
+        await test.remove();
+
+        res.json({ message: 'Test removed' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+}
+
+
+module.exports = { createNewTest, getAllTest, getTest, updateTest, deleteTest }
 

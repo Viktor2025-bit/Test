@@ -1,16 +1,29 @@
-const express = require("express")
-const { signup, login, getUserStats, getActiveTest, getResults } = require("../Controllers/user.controller")
-const authMiddleware = require("../Middleware/authMiddleware")
-const router = express.Router()
+const express = require('express');
+const {  registerUser, loginUser, userProfile } = require("../Controllers/user.controller")
+const { protect } = require("../Middleware/authMiddleware")
 
-router.post("/create", signup)
+const router = express.Router();
 
-router.post("/login", login)
+// Generate JWT
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: '30d'
+  });
+};
 
-router.get("/stats", authMiddleware, getUserStats)
+// @route   POST /api/auth/register
+// @desc    Register a new user
+router.post('/register', registerUser );
 
-router.get("/tests/active", authMiddleware, getActiveTest)
 
-router.get("/results", authMiddleware, getResults)
+// @route   POST /api/auth/login
+// @desc    Login user
+router.post('/login', loginUser );
 
-module.exports = router
+
+
+// @route   GET /api/auth/profile
+// @desc    Get user profile
+router.get('/profile', protect, userProfile );
+
+module.exports = router;
